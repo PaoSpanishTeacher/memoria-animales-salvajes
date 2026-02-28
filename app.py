@@ -142,8 +142,8 @@ html_salvajes = r"""
         const ANIMALES = [
             { n: "León", i: "🦁" }, { n: "Tigre", i: "🐯" }, { n: "Elefante", i: "🐘" },
             { n: "Jirafa", i: "🦒" }, { n: "Mono", i: "🐒" }, { n: "Cebra", i: "🦓" },
-            { n: "Oso", i: "🐻" }, { n: "Cocodrilo", i: "🐊" }, { n: "Rino", i: "🦏" },
-            { n: "Hippo", i: "🦛" }
+            { n: "Oso", i: "🐻" }, { n: "Cocodrilo", i: "🐊" }, { n: "Rinoceronte", i: "🦏" },
+            { n: "Hipopótamo", i: "🦛" }
         ];
 
         let flipped = [];
