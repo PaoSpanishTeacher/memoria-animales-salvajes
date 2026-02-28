@@ -4,16 +4,16 @@ import streamlit.components.v1 as components
 # 1. Configuración de pantalla ancha
 st.set_page_config(page_title="Memoria: Animales Salvajes", layout="wide")
 
-# Estilo para eliminar márgenes extra de Streamlit y que se vea profesional
+# Estilo para eliminar márgenes extra de Streamlit
 st.markdown("""
     <style>
     .block-container { padding-top: 1rem; padding-bottom: 0rem; }
-    iframe { border-radius: 15px; }
+    iframe { border-radius: 15px; border: none; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. El Código del Juego con el diseño "Selva" recuperado
-html_salvajes = r"""
+# 2. Código del Juego con Audio y Voz integrados
+html_animales_audio = r"""
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -32,13 +32,9 @@ html_salvajes = r"""
             background: linear-gradient(rgba(27, 67, 50, 0.8), rgba(27, 67, 50, 0.8)), 
                         url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1350&q=80');
             background-size: cover;
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; overflow: hidden;
         }
 
         header { text-align: center; color: white; margin-bottom: 10px; }
@@ -48,16 +44,13 @@ html_salvajes = r"""
         .game-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            width: 95%;
-            max-width: 850px;
+            gap: 12px; width: 95%; max-width: 850px;
             perspective: 1000px;
         }
 
         .card {
             aspect-ratio: 1 / 1;
-            position: relative;
-            cursor: pointer;
+            position: relative; cursor: pointer;
             transform-style: preserve-3d;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -65,38 +58,26 @@ html_salvajes = r"""
         .card.flipped { transform: rotateY(180deg); }
 
         .card-face {
-            position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 4px solid white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* CARA FRONTAL (La que se ve al inicio - DISEÑO RECUPERADO) */
         .card-front {
             background: linear-gradient(45deg, #1b4332, #40916c);
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0 40 L40 0 M10 40 L40 10 M20 40 L40 20 M30 40 L40 30 M0 30 L30 0 M0 20 L20 0 M0 10 L10 0" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none"/></svg>');
             z-index: 2;
         }
 
-        /* Texto/Figuritas en la cara frontal */
         .card-front::after {
-            content: '🌿🐆🐒🌿';
-            font-size: 1.2rem;
-            text-align: center;
-            color: rgba(255,255,255,0.8);
-            letter-spacing: 2px;
+            content: '🌿🐾🌿';
+            font-size: 1.2rem; color: rgba(255,255,255,0.8);
         }
 
-        /* CARA TRASERA (Al voltear) */
         .card-back {
             background-color: var(--crema);
             transform: rotateY(180deg);
-            padding: 5px;
         }
 
         .card.matched .card-back {
@@ -104,8 +85,8 @@ html_salvajes = r"""
             border-color: #b7e4c7;
         }
 
-        .card-image { font-size: 4.5rem; } /* FIGURAS GIGANTES */
-        .card-text { font-size: 1.2rem; font-weight: 900; color: var(--verde-selva); text-align: center; text-transform: uppercase; }
+        .card-content { font-size: 3.5rem; text-align: center; }
+        .card-text { font-size: 1.2rem; font-weight: 900; color: var(--verde-selva); text-transform: uppercase; }
 
         #final-screen {
             position: fixed; inset: 0;
@@ -119,8 +100,14 @@ html_salvajes = r"""
             padding: 15px 35px; background: var(--naranja);
             color: white; border: none; border-radius: 30px;
             font-size: 1.4rem; font-weight: bold; cursor: pointer; margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(255, 159, 28, 0.4);
         }
+
+        #feedback-msg {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            font-size: 4rem; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            z-index: 100; pointer-events: none; transition: transform 0.3s;
+        }
+        #feedback-msg.show { transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body>
@@ -131,12 +118,18 @@ html_salvajes = r"""
 
     <main class="game-container" id="game-board"></main>
 
+    <div id="feedback-msg">¡Muy bien!</div>
+
     <div id="final-screen">
         <span style="font-size: 5rem;">🦁🐘🦒</span>
-        <h2>¡INCREÍBLE!</h2>
-        <p style="font-size: 1.5rem;">Lograste encontrar todos los animales de la selva.</p>
+        <h2>¡INCREÍBLE TRABAJO!</h2>
+        <p style="font-size: 1.5rem;">Has dominado el vocabulario de la selva.</p>
         <button class="btn-restart" onclick="location.reload()">JUGAR OTRA VEZ</button>
     </div>
+
+    <audio id="sfx-hit" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+    <audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="sfx-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
 
     <script>
         const ANIMALES = [
@@ -165,7 +158,7 @@ html_salvajes = r"""
                 card.innerHTML = `
                     <div class="card-face card-front"></div>
                     <div class="card-face card-back">
-                        ${d.t === 'img' ? `<span class="card-image">${d.v}</span>` : `<span class="card-text">${d.v}</span>`}
+                        <span class="${d.t === 'img' ? 'card-content' : 'card-text'}">${d.v}</span>
                     </div>`;
                 card.onclick = () => flip(card);
                 board.appendChild(card);
@@ -184,15 +177,23 @@ html_salvajes = r"""
             const [c1, c2] = flipped;
             if (c1.dataset.id === c2.dataset.id) {
                 matched++;
+                // Sonido de acierto
+                document.getElementById('sfx-hit').play().catch(()=>{});
+                
+                // Feedback visual
+                const msg = document.getElementById('feedback-msg');
+                msg.classList.add('show');
+                setTimeout(() => msg.classList.remove('show'), 800);
+
                 c1.classList.add('matched');
                 c2.classList.add('matched');
                 flipped = [];
                 locked = false;
-                if (matched === ANIMALES.length) {
-                    confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
-                    setTimeout(() => document.getElementById('final-screen').style.display = 'flex', 600);
-                }
+
+                if (matched === ANIMALES.length) win();
             } else {
+                // Sonido de error
+                document.getElementById('sfx-error').play().catch(()=>{});
                 setTimeout(() => {
                     c1.classList.remove('flipped');
                     c2.classList.remove('flipped');
@@ -201,11 +202,29 @@ html_salvajes = r"""
                 }, 1000);
             }
         }
+
+        function win() {
+            // Sonido de victoria
+            document.getElementById('sfx-win').play().catch(()=>{});
+            
+            // Confeti
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+            
+            // Voz de la profesora
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance("Excelente trabajo, has encontrado todos los animales salvajes.");
+                msg.lang = 'es-ES';
+                window.speechSynthesis.speak(msg);
+            }
+
+            setTimeout(() => document.getElementById('final-screen').style.display = 'flex', 600);
+        }
+
         createBoard();
     </script>
 </body>
 </html>
 """
 
-# 3. Altura de visualización
-components.html(html_salvajes, height=900, scrolling=False)
+# 3. Renderizado del componente
+components.html(html_animales_audio, height=900, scrolling=False)
