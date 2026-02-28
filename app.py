@@ -1,10 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. Configuración de pantalla ancha y título
+# 1. Configuración de pantalla ancha
 st.set_page_config(page_title="Memoria: Animales Salvajes", layout="wide")
 
-# Estilo para eliminar márgenes extra de Streamlit
+# Estilo para eliminar márgenes extra de Streamlit y que se vea profesional
 st.markdown("""
     <style>
     .block-container { padding-top: 1rem; padding-bottom: 0rem; }
@@ -12,7 +12,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. El Código del Juego Optimizado
+# 2. El Código del Juego con el diseño "Selva" recuperado
 html_salvajes = r"""
 <!DOCTYPE html>
 <html lang="es">
@@ -22,6 +22,7 @@ html_salvajes = r"""
     <style>
         :root {
             --verde-selva: #1b4332;
+            --verde-medio: #2d6a4f;
             --naranja: #ff9f1c;
             --crema: #f8f9fa;
         }
@@ -37,28 +38,28 @@ html_salvajes = r"""
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; /* Evita el doble scroll */
+            overflow: hidden;
         }
 
-        header { text-align: center; color: white; margin-bottom: 15px; }
-        h1 { margin: 0; font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        header { text-align: center; color: white; margin-bottom: 10px; }
+        h1 { margin: 0; font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-weight: 800; }
         .brand { font-style: italic; color: #95d5b2; font-size: 1rem; }
 
         .game-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            gap: 12px;
             width: 95%;
-            max-width: 800px;
+            max-width: 850px;
             perspective: 1000px;
         }
 
         .card {
-            aspect-ratio: 1 / 1; /* Fichas cuadradas para que quepan mejor */
+            aspect-ratio: 1 / 1;
             position: relative;
             cursor: pointer;
             transform-style: preserve-3d;
-            transition: transform 0.5s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card.flipped { transform: rotateY(180deg); }
@@ -67,28 +68,44 @@ html_salvajes = r"""
             position: absolute;
             width: 100%; height: 100%;
             backface-visibility: hidden;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 3px solid white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
+        /* CARA FRONTAL (La que se ve al inicio - DISEÑO RECUPERADO) */
         .card-front {
-            background: linear-gradient(45deg, #2d6a4f, #40916c);
+            background: linear-gradient(45deg, #1b4332, #40916c);
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0 40 L40 0 M10 40 L40 10 M20 40 L40 20 M30 40 L40 30 M0 30 L30 0 M0 20 L20 0 M0 10 L10 0" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="none"/></svg>');
             z-index: 2;
         }
-        .card-front::after { content: '🌿'; font-size: 2rem; }
 
+        /* Texto/Figuritas en la cara frontal */
+        .card-front::after {
+            content: '🌿🐆🐒🌿';
+            font-size: 1.2rem;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+        }
+
+        /* CARA TRASERA (Al voltear) */
         .card-back {
             background-color: var(--crema);
             transform: rotateY(180deg);
             padding: 5px;
         }
 
-        .card-image { font-size: 4rem; } /* ANIMALES MÁS GRANDES */
-        .card-text { font-size: 1.1rem; font-weight: bold; color: var(--verde-selva); text-align: center; word-break: break-word; }
+        .card.matched .card-back {
+            background-color: #d8f3dc;
+            border-color: #b7e4c7;
+        }
+
+        .card-image { font-size: 4.5rem; } /* FIGURAS GIGANTES */
+        .card-text { font-size: 1.2rem; font-weight: 900; color: var(--verde-selva); text-align: center; text-transform: uppercase; }
 
         #final-screen {
             position: fixed; inset: 0;
@@ -99,25 +116,26 @@ html_salvajes = r"""
         }
 
         .btn-restart {
-            padding: 12px 25px; background: var(--naranja);
-            color: white; border: none; border-radius: 25px;
-            font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 15px;
+            padding: 15px 35px; background: var(--naranja);
+            color: white; border: none; border-radius: 30px;
+            font-size: 1.4rem; font-weight: bold; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 159, 28, 0.4);
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Animales Salvajes</h1>
+        <h1>Memoria: Animales Salvajes</h1>
         <div class="brand">PaoSpanishTeacher</div>
     </header>
 
     <main class="game-container" id="game-board"></main>
 
     <div id="final-screen">
-        <span style="font-size: 4rem;">🦁🏆</span>
-        <h2>¡Felicidades!</h2>
-        <p>Has encontrado todos los animales salvajes.</p>
-        <button class="btn-restart" onclick="location.reload()">Jugar otra vez</button>
+        <span style="font-size: 5rem;">🦁🐘🦒</span>
+        <h2>¡INCREÍBLE!</h2>
+        <p style="font-size: 1.5rem;">Lograste encontrar todos los animales de la selva.</p>
+        <button class="btn-restart" onclick="location.reload()">JUGAR OTRA VEZ</button>
     </div>
 
     <script>
@@ -147,7 +165,7 @@ html_salvajes = r"""
                 card.innerHTML = `
                     <div class="card-face card-front"></div>
                     <div class="card-face card-back">
-                        ${d.t === 'text' ? `<span class="card-text">${d.v}</span>` : `<span class="card-image">${d.v}</span>`}
+                        ${d.t === 'img' ? `<span class="card-image">${d.v}</span>` : `<span class="card-text">${d.v}</span>`}
                     </div>`;
                 card.onclick = () => flip(card);
                 board.appendChild(card);
@@ -166,11 +184,13 @@ html_salvajes = r"""
             const [c1, c2] = flipped;
             if (c1.dataset.id === c2.dataset.id) {
                 matched++;
+                c1.classList.add('matched');
+                c2.classList.add('matched');
                 flipped = [];
                 locked = false;
                 if (matched === ANIMALES.length) {
-                    confetti();
-                    setTimeout(() => document.getElementById('final-screen').style.display = 'flex', 500);
+                    confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+                    setTimeout(() => document.getElementById('final-screen').style.display = 'flex', 600);
                 }
             } else {
                 setTimeout(() => {
@@ -187,5 +207,5 @@ html_salvajes = r"""
 </html>
 """
 
-# 3. Renderizado final con altura ajustada (850 píxeles suele ser perfecto)
-components.html(html_salvajes, height=850, scrolling=False)
+# 3. Altura de visualización
+components.html(html_salvajes, height=900, scrolling=False)
